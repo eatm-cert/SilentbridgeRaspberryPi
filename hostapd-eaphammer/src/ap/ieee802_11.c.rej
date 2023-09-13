@@ -1,0 +1,13 @@
+--- src/ap/ieee802_11.c	2017-04-17 01:49:00.073563494 -0400
++++ src/ap/ieee802_11.c	2016-10-02 14:51:11.000000000 -0400
+@@ -1418,8 +1416,8 @@
+ 	if (ssid_ie == NULL)
+ 		return WLAN_STATUS_UNSPECIFIED_FAILURE;
+ 
+-	if ((!wpe_conf.wpe_enable_karma) && (ssid_ie_len != hapd->conf->ssid.ssid_len ||
+-	    os_memcmp(ssid_ie, hapd->conf->ssid.ssid, ssid_ie_len) != 0)) {
++	if (ssid_ie_len != hapd->conf->ssid.ssid_len ||
++	    os_memcmp(ssid_ie, hapd->conf->ssid.ssid, ssid_ie_len) != 0) {
+ 		hostapd_logger(hapd, sta->addr, HOSTAPD_MODULE_IEEE80211,
+ 			       HOSTAPD_LEVEL_INFO,
+ 			       "Station tried to associate with unknown SSID "

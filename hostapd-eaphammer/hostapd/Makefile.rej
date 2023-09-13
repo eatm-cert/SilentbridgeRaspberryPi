@@ -1,0 +1,48 @@
+--- hostapd/Makefile	2017-04-17 01:48:59.921563489 -0400
++++ hostapd/Makefile	2016-10-02 14:51:11.000000000 -0400
+@@ -86,7 +86,6 @@
+ OBJS += ../src/ap/bss_load.o
+ OBJS += ../src/ap/neighbor_db.o
+ OBJS += ../src/ap/rrm.o
+-OBJS += ../src/wpe/wpe.o
+ 
+ OBJS_c = hostapd_cli.o
+ OBJS_c += ../src/common/wpa_ctrl.o
+@@ -1013,7 +1012,7 @@
+ endif
+ endif
+ 
+-ALL=hostapd-wpe hostapd-wpe_cli
++ALL=hostapd hostapd_cli
+ 
+ all: verify_config $(ALL)
+ 
+@@ -1060,15 +1059,15 @@
+ 
+ BCHECK=../src/drivers/build.hostapd
+ 
+-hostapd-wpe: $(BCHECK) $(OBJS)
+-	$(Q)$(CC) $(LDFLAGS) -o hostapd-wpe $(OBJS) $(LIBS)
++hostapd: $(BCHECK) $(OBJS)
++	$(Q)$(CC) $(LDFLAGS) -o hostapd $(OBJS) $(LIBS)
+ 	@$(E) "  LD " $@
+ 
+ ifdef CONFIG_WPA_TRACE
+ OBJS_c += ../src/utils/trace.o
+ endif
+-hostapd-wpe_cli: $(OBJS_c)
+-	$(Q)$(CC) $(LDFLAGS) -o hostapd-wpe_cli $(OBJS_c) $(LIBS_c)
++hostapd_cli: $(OBJS_c)
++	$(Q)$(CC) $(LDFLAGS) -o hostapd_cli $(OBJS_c) $(LIBS_c)
+ 	@$(E) "  LD " $@
+ 
+ NOBJS = nt_password_hash.o ../src/crypto/ms_funcs.o $(SHA1OBJS)
+@@ -1115,7 +1114,7 @@
+ 
+ clean:
+ 	$(MAKE) -C ../src clean
+-	rm -f core *~ *.o hostapd-wpe hostapd-wpe_cli nt_password_hash hlr_auc_gw
++	rm -f core *~ *.o hostapd hostapd_cli nt_password_hash hlr_auc_gw
+ 	rm -f *.d *.gcno *.gcda *.gcov
+ 	rm -f lcov.info
+ 	rm -rf lcov-html

@@ -1,0 +1,41 @@
+--- hostapd/main.c	2017-04-17 01:48:59.929563490 -0400
++++ hostapd/main.c	2016-10-02 14:51:11.000000000 -0400
+@@ -486,12 +477,7 @@
+ 		"   -i   list of interface names to use\n"
+ 		"   -S   start all the interfaces synchronously\n"
+ 		"   -t   include timestamps in some debug messages\n"
+-		"   -v   show hostapd version\n\n"
+-        " WPE Options -------------------\n"
+-        "       (credential logging always enabled)\n"
+-        "   -s   Return Success where possible\n" 
+-        "   -k   Karma Mode (Respond to all probes)\n"
+-        "   -c   Cupid Mode (Heartbleed clients)\n\n");
++		"   -v   show hostapd version\n");
+ 
+ 	exit(1);
+ }
+@@ -666,7 +652,7 @@
+ 	dl_list_init(&interfaces.global_ctrl_dst);
+ 
+ 	for (;;) {
+-		c = getopt(argc, argv, "b:Bde:f:hi:KP:STtu:vg:G:kcs");
++		c = getopt(argc, argv, "b:Bde:f:hi:KP:STtu:vg:G:");
+ 		if (c < 0)
+ 			break;
+ 		switch (c) {
+@@ -735,15 +721,6 @@
+ 							&if_names_size, optarg))
+ 				goto out;
+ 			break;
+-        case 'k':
+-            wpe_conf.wpe_enable_karma++;
+-            break;
+-        case 'c':
+-            wpe_conf.wpe_enable_cupid++;
+-            break;
+-        case 's': 
+-            wpe_conf.wpe_enable_return_success++;
+-            break;
+ 		default:
+ 			usage();
+ 			break;

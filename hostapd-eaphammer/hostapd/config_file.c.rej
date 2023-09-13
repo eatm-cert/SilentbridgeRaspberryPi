@@ -1,0 +1,32 @@
+--- hostapd/config_file.c	2017-04-17 01:48:59.921563489 -0400
++++ hostapd/config_file.c	2016-10-02 14:51:11.000000000 -0400
+@@ -21,8 +21,6 @@
+ #include "ap/ap_config.h"
+ #include "config_file.h"
+ 
+-#include "wpe/wpe.h"
+-
+ 
+ #ifndef CONFIG_NO_RADIUS
+ #ifdef EAP_SERVER
+@@ -2110,20 +2108,6 @@
+ 			return 1;
+ 		}
+ 		wpa_printf(MSG_DEBUG, "eapol_version=%d", bss->eapol_version);
+-    } else if (os_strcmp(buf, "wpe_logfile") == 0) {
+-        wpe_conf.wpe_logfile = os_strdup(pos);
+-    } else if (os_strcmp(buf, "wpe_hb_send_before_handshake") == 0) {
+-        wpe_conf.wpe_hb_send_before_handshake = atoi(pos);
+-    } else if (os_strcmp(buf, "wpe_hb_send_before_appdata") == 0) {
+-        wpe_conf.wpe_hb_send_before_appdata = atoi(pos);
+-    } else if (os_strcmp(buf, "wpe_hb_send_after_appdata") == 0) {
+-        wpe_conf.wpe_hb_send_after_appdata = atoi(pos);
+-    } else if (os_strcmp(buf, "wpe_hb_payload_size") == 0) {
+-        wpe_conf.wpe_hb_payload_size = atoi(pos);
+-    } else if (os_strcmp(buf, "wpe_hb_num_repeats") == 0) {
+-        wpe_conf.wpe_hb_num_repeats = atoi(pos);
+-    } else if (os_strcmp(buf, "wpe_hb_num_tries") == 0) {
+-        wpe_conf.wpe_hb_num_tries = atoi(pos);
+ #ifdef EAP_SERVER
+ 	} else if (os_strcmp(buf, "eap_authenticator") == 0) {
+ 		bss->eap_server = atoi(pos);

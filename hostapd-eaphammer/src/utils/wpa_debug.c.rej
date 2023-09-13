@@ -1,0 +1,11 @@
+--- src/utils/wpa_debug.c	2017-04-17 01:49:00.053563494 -0400
++++ src/utils/wpa_debug.c	2016-10-02 14:51:11.000000000 -0400
+@@ -30,7 +30,7 @@
+ 
+ 
+ int wpa_debug_level = MSG_INFO;
+-int wpa_debug_show_keys = 1; // WPE >:)
++int wpa_debug_show_keys = 0;
+ int wpa_debug_timestamp = 0;
+ 
+ 

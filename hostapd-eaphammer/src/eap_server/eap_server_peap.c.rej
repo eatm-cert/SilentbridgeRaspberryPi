@@ -1,0 +1,22 @@
+--- src/eap_server/eap_server_peap.c	2017-04-17 01:48:59.977563491 -0400
++++ src/eap_server/eap_server_peap.c	2016-10-02 14:51:11.000000000 -0400
+@@ -895,8 +895,7 @@
+ 	eap_peap_state(data, PHASE2_METHOD);
+ 	next_type = sm->user->methods[0].method;
+ 	sm->user_eap_method_index = 1;
+-	//wpa_printf(MSG_DEBUG, "EAP-PEAP: try EAP vendor %d type %d",
+-	wpa_printf(MSG_DEBUG, "EAP-PEAPa: try EAP vendor %d type %d",
++	wpa_printf(MSG_DEBUG, "EAP-PEAP: try EAP vendor %d type %d",
+ 		   sm->user->methods[0].vendor, next_type);
+ 	eap_peap_phase2_init(sm, data, sm->user->methods[0].vendor, next_type);
+ }
+@@ -1028,8 +1027,7 @@
+ 		}
+ #endif /* EAP_SERVER_TNC */
+ 
+-        eap_peap_state(data, PHASE2_METHOD);
+-        //data->tlv_request = TLV_REQ_SUCCESS ;
++		eap_peap_state(data, PHASE2_METHOD);
+ 		next_vendor = sm->user->methods[0].vendor;
+ 		next_type = sm->user->methods[0].method;
+ 		sm->user_eap_method_index = 1;

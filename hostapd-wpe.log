@@ -1,0 +1,16 @@
+
+
+mschapv2: Fri Aug 25 16:41:47 2023
+	 username:		didi
+	 challenge:		84:df:8c:0c:2c:6c:7a:e6
+	 response:		db:6b:2a:eb:c4:bb:db:fa:54:50:73:c6:7c:e5:e9:78:d3:45:8b:4a:91:98:57:f7
+	 jtr NETNTLM:		didi:$NETNTLM$84df8c0c2c6c7ae6$db6b2aebc4bbdbfa545073c67ce5e978d3458b4a919857f7
+	 hashcat NETNTLM:	didi::::db6b2aebc4bbdbfa545073c67ce5e978d3458b4a919857f7:84df8c0c2c6c7ae6
+
+
+mschapv2: Fri Aug 25 16:41:54 2023
+	 username:		didi
+	 challenge:		c3:f3:b9:77:c0:cd:2c:53
+	 response:		3e:33:61:69:2a:20:69:be:ba:5a:b3:b7:6d:67:4e:90:d4:59:15:4d:39:eb:24:21
+	 jtr NETNTLM:		didi:$NETNTLM$c3f3b977c0cd2c53$3e3361692a2069beba5ab3b76d674e90d459154d39eb2421
+	 hashcat NETNTLM:	didi::::3e3361692a2069beba5ab3b76d674e90d459154d39eb2421:c3f3b977c0cd2c53

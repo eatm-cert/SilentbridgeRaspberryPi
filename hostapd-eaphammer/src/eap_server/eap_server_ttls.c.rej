@@ -1,0 +1,40 @@
+--- src/eap_server/eap_server_ttls.c	2017-04-17 01:48:59.985563491 -0400
++++ src/eap_server/eap_server_ttls.c	2016-10-02 14:51:11.000000000 -0400
+@@ -538,11 +536,9 @@
+ 		return;
+ 	}
+ 
+-	wpe_log_basic("eap-ttls/pap", sm->identity, sm->identity_len, user_password, user_password_len);
+-
+-	if ((!wpe_conf.wpe_enable_return_success) && (sm->user->password_len != user_password_len ||
+-	    os_memcmp_const(sm->user->password, user_password, user_password_len) != 0)) {
+-
++	if (sm->user->password_len != user_password_len ||
++	    os_memcmp_const(sm->user->password, user_password,
++			    user_password_len) != 0) {
+ 		wpa_printf(MSG_DEBUG, "EAP-TTLS/PAP: Invalid user password");
+ 		eap_ttls_state(data, FAILURE);
+ 		return;
+@@ -605,9 +601,8 @@
+ 	chap_md5(password[0], sm->user->password, sm->user->password_len,
+ 		 challenge, challenge_len, hash);
+ 
+-	wpe_log_chalresp("eap-ttls/chap", sm->identity, sm->identity_len, challenge, challenge_len, password, password_len);
+-
+-	if ((wpe_conf.wpe_enable_return_success) || (os_memcmp(hash, password + 1, EAP_TTLS_CHAP_PASSWORD_LEN) == 0)) {
++	if (os_memcmp_const(hash, password + 1, EAP_TTLS_CHAP_PASSWORD_LEN) ==
++	    0) {
+ 		wpa_printf(MSG_DEBUG, "EAP-TTLS/CHAP: Correct user password");
+ 		eap_ttls_state(data, SUCCESS);
+ 		eap_ttls_valid_session(sm, data);
+@@ -675,9 +670,7 @@
+ 		nt_challenge_response(challenge, sm->user->password,
+ 				      sm->user->password_len, nt_response);
+ 
+-	wpe_log_chalresp("eap-ttls/mschap", sm->identity, sm->identity_len, challenge, challenge_len, response + 2 + 24, 24);
+-
+-	if ((wpe_conf.wpe_enable_return_success) || (os_memcmp(nt_response, response + 2 + 24, 24) == 0)) {
++	if (os_memcmp_const(nt_response, response + 2 + 24, 24) == 0) {
+ 		wpa_printf(MSG_DEBUG, "EAP-TTLS/MSCHAP: Correct response");
+ 		eap_ttls_state(data, SUCCESS);
+ 		eap_ttls_valid_session(sm, data);

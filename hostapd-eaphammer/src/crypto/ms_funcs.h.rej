@@ -1,0 +1,13 @@
+--- src/crypto/ms_funcs.h	2017-04-17 01:48:59.941563490 -0400
++++ src/crypto/ms_funcs.h	2016-10-02 14:51:11.000000000 -0400
+@@ -9,10 +9,6 @@
+ #ifndef MS_FUNCS_H
+ #define MS_FUNCS_H
+ 
+-int challenge_hash(const u8 *peer_challenge, const u8 *auth_challenge,
+-              const u8 *username, size_t username_len,
+-              u8 *challenge);
+-
+ int generate_nt_response(const u8 *auth_challenge, const u8 *peer_challenge,
+ 			 const u8 *username, size_t username_len,
+ 			 const u8 *password, size_t password_len,
