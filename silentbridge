@@ -417,32 +417,15 @@ def bait_and_switch(configs, options):
         splitters.print_state(pretty=True)
         print '[*] Done.'
     
-    '''  
-    mask = netmask.count('255')
-    new_ip_addr_prefix = '.'.join(client_ip.split('.')[:mask]) 
-    print '[*] new static addr prefix %s' % new_ip_addr_prefix
-    if mask == 3:
-        new_route = new_ip_addr_prefix + '.0/24'
-    elif mask == 2:
-        new_route = new_ip_addr_prefix + '0.0/24'
-    else:
-        print 'Most likely the netmask you entered is wrong. If not, you might want to chqnge the code in silentbridge.py around line 446'
-    '''
-    '''
-    print '[*] Making sure upstream and PHY are down...'
-    # make sure upstream and phy are down
-    os.system('ifconfig %s down' % (upstream))
-    os.system('ifconfig %s down' % (phy))
+    #determine subnet using client_ip and netmask
+    subnet = '.'.join([str(int(octet) & int(masked)) for octet, masked in zip(client_ip.split('.'), netmask.split('.'))])
+    print 'subnet %s' % subnet
+    
+    print '[*] Destroying bridge'
+    destroy_bridge(configs, options)
     print '[*] Done.'
-    '''
-    print '[*] Bringing bridge down...'
-    try:
-        bridge_down(configs, options)
-    except OSError:
-        print '[*] No bridge found... bringing PHY and upstream down independently...'
-        os.system('ifconfig %s down' % phy)
-        os.system('ifconfig %s down' % (upstream))
-        pass
+    
+    
     
     print '[*] Setting MAC address of upstream to MAC address of client...'
     # upstream mac address to mac address of client
@@ -458,23 +441,22 @@ def bait_and_switch(configs, options):
         splitters.set_upstream(True)
         splitters.print_state(pretty=True)
         print '[*] Done.'
+        
+    print '[*] Waiting a few seconds before bringing upstream up again'
+    time.sleep(5)
 
     # set upstream NIC client's IP address
     print '[*] Bringing upstream up with supplicant\'s IP address...'
     os.system('ifconfig %s %s netmask %s up' % (upstream, client_ip, netmask))
+    
     print '[*] Done.'
 
-    print '[*] Updating routing table...'
-    os.system('ip route del %s' % '192.168.1.0/24')
-    #os.system('ip route add %s dev %s' % (new_route, 'br0'))
-    #os.system('route add default gw %s %s' % (gw_ip, upstream))
-    os.system('ip route add default via %s dev %s' % (gw_ip, upstream))
-    print '[*] Done.'
+    
 
     
     print '[*] Authenticating using wpa_supplicant...'
     # authenticate using wpa_supplicant
-    os.system('wpa_supplicant -c %s -D wired -i %s' % (wpa_supplicant_conf,upstream))
+    os.system('wpa_supplicant -c %s -D wired -i %s' % (wpa_supplicant_conf, upstream))
     print '[*] Done.'
 
 
@@ -522,13 +504,20 @@ def clear_traces(config, options):
     phy = options['phy']
     upstream = options['upstream']
     
-    destroy_bridge(config, options)
+    try:
+        destroy_bridge(config, options)
+        #revert mac addresses
+        os.system('macchanger -p %s' % phy)
+        os.system('macchanger -p %s' % upstream)
     
-    #revert mac addresses
-    os.system('macchanger -p %s' % phy)
-    os.system('macchanger -p %s' % upstream)
+        create_transparent_bridge(config, options)
+    except:
+        os.system('ifconfig %s down' % upstream)
+        os.system('macchanger -p %s' % phy)
+        os.system('macchanger -p %s' % upstream)
+        create_transparent_bridge(config, options)
     
-    create_transparent_bridge(config, options)
+    
     
     print '[*] The bridges has been reinitialized.'
     

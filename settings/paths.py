@@ -24,3 +24,6 @@ CA_PEM = os.path.join(CERTS_DIR, 'ca.pem')
 SERVER_PEM = os.path.join(CERTS_DIR, 'server.pem')
 PRIVATE_KEY = os.path.join(CERTS_DIR, 'server.pem')
 DH_FILE = os.path.join(CERTS_DIR, 'dh')
+
+HOSTAPD_EXEC_PATH = os.path.join(ROOT_DIR, 'hostapd-2.6/hostapd/hostapd-wpe')
+HOSTAPD_LIB_PATH = os.path.join(ROOT_DIR,'hostapd-2.6/hostapd/libhostapd-eaphammer.so')
