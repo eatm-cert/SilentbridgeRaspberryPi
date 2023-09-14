@@ -1,6 +1,6 @@
 ![](https://raw.githubusercontent.com/s0lst1c3/readme-images/master/silent-bridge-logo.png)
 
-# silentbridge
+# Silentbridge
 Original toolkit by Gabriel Ryan ([@s0lst1c3](https://twitter.com/s0lst1c3)) @ SpecterOps (gryan@specterops.io)
 This version is an implementation and update of the toolkit for a RaspberryPi 3 running Rasperrypi OS.
 
