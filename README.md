@@ -12,7 +12,7 @@ You can check out the accompanying whitepaper at [https://www.researchgate.net/p
 ## Getting Started
 For usage and setup instructions, please refer to the project's wiki page:
 
-- [https://github.com/s0lst1c3/silentbridge/wiki](https://github.com/humberan/SilentbridgeRaspberryPi/wiki)
+- [https://github.com/humberan/SilentbridgeRaspberryPi/wiki](https://github.com/humberan/SilentbridgeRaspberryPi/wiki)
 
 
 
